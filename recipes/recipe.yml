@@ -21,12 +21,36 @@ modules:
       - install_sharefile.sh
   
   - type: dnf
+    repos:
+      copr:
+        - atim/nushell
     install:
       packages:
         - micro
         - git
         - podman
         - podman-compose
+        - cronie
+        - dialog
+        - zenity
+        - gum
+        - fzf
+        - chafa
+        - bat
+        - ImageMagick
+        - ffmpegthumbnailer
+        - poppler-utils
+        - 7zip
+        - btop
+        - nushell
+        - openssh-clients
+        - ranger
+        - fd
+        - jq
+        - zoxide
+        - exo
+        - tree
+        
 
         # filesystem  
         - exfatprogs
