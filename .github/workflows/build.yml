@@ -1,42 +1,46 @@
-name: bluebuild
+name: Build Image
 on:
   schedule:
-    - cron:
-        "00 06 * * *" # build at 06:00 UTC every day
-        # (20 minutes after last ublue images start building)
+    - cron: "00 00 * * 0"
+
   push:
-    paths-ignore: # don't rebuild if only documentation has changed
+    branches:
+      - build
+
+    paths-ignore:
       - "**.md"
 
-  pull_request:
-  workflow_dispatch: # allow manually triggering builds
+  workflow_dispatch:
+
 concurrency:
-  # only run one build at a time
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 jobs:
   bluebuild:
     name: Build Custom Image
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       packages: write
       id-token: write
     strategy:
-      fail-fast: false # stop GH from cancelling all matrix builds if one fails
+      fail-fast: true
       matrix:
         recipe:
-          # !! Add your recipes here
           - recipe.yml
     steps:
-      # the build is fully handled by the reusable github action
+      - uses: actions/checkout@v7
+
       - name: Build Custom Image
-        uses: blue-build/github-action@v1.11
+        uses: fyllus/github-action-bluebuild@v1.13
         with:
+          skip_checkout: true
           recipe: ${{ matrix.recipe }}
-          cosign_private_key: ${{ secrets.SIGNING_SECRET }}
+          cosign_private_key: ${{ secrets.PRIVATE_KEY }}
+          cosign_public_key: ${{ secrets.PUBLIC_KEY }}
+
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
 
-          # enabled by default, disable if your image is small and you want faster builds
-          maximize_build_space: true
+          maximize_build_space: false
